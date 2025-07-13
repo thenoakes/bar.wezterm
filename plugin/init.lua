@@ -250,15 +250,16 @@ wez.on("update-status", function(window, pane)
     ::continue::
   end
 
+  
+  -- remove trailing separator
+  table.remove(right_cells, #right_cells)
+  table.insert(right_cells, { Text = string.rep(" ", options.padding.right) })
+  
   local branch = get_git_branch(pane)
   if branch then
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(right_cells, {Text="🔀 " .. branch .. " "})
   end
-
-  -- remove trailing separator
-  table.remove(right_cells, #right_cells)
-  table.insert(right_cells, { Text = string.rep(" ", options.padding.right) })
 
   window:set_right_status(wez.format(right_cells))
 end)
