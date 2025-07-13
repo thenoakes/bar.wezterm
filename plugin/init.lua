@@ -172,8 +172,8 @@ wez.on("update-status", function(window, pane)
   local os = require 'os'
 
   -- Function to get current git branch
-  local function get_git_branch(pane)
-    local cwd_uri = pane:get_current_working_dir()
+  local function get_git_branch(p)
+    local cwd_uri = p:get_current_working_dir()
     if not cwd_uri then
       return nil
     end
