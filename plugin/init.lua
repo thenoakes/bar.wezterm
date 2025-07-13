@@ -179,6 +179,7 @@ wez.on("update-status", function(window, pane)
     end
 
     local cwd = cwd_uri.file_path -- strip 'file://'
+    wez.log_info("Current working directory: " .. cwd)
     local cmd = 'git -C ' .. cwd .. ' rev-parse --abbrev-ref HEAD 2>/dev/null'
     local handle = io.popen(cmd)
     local branch = handle:read("*a")
