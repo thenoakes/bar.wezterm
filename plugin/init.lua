@@ -18,20 +18,20 @@ end
 ---returns the name of the package, used when requiring modules
 ---@return string
 local function get_require_path()
-  local path = "httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDswezterm"
-  local path_trailing_slash = "httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDsweztermsZs"
+  local path = "httpssCssZssZsgithubsDscomsZsthenoakesZsbarsDswezterm"
+  local path_trailing_slash = "httpssCssZssZsgithubsDscomsZsthenoakesZsbarsDsweztermsZs"
   return directory_exists(path_trailing_slash) and path_trailing_slash or path
 end
 
 package.path = package.path
-  .. ";"
-  .. plugin_dir
-  .. separator
-  .. get_require_path()
-  .. separator
-  .. "plugin"
-  .. separator
-  .. "?.lua"
+    .. ";"
+    .. plugin_dir
+    .. separator
+    .. get_require_path()
+    .. separator
+    .. "plugin"
+    .. separator
+    .. "?.lua"
 
 local utilities = require "bar.utilities"
 local config = require "bar.config"
@@ -90,8 +90,8 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local index = tab.tab_index + 1
   local offset = #tostring(index) + #options.separator.left_icon + (2 * options.separator.space) + 2
   local title = index
-    .. utilities._space(options.separator.left_icon, options.separator.space, nil)
-    .. tabs.get_title(tab)
+      .. utilities._space(options.separator.left_icon, options.separator.space, nil)
+      .. tabs.get_title(tab)
 
   local width = conf.tab_max_width - offset
   if #title > conf.tab_max_width then
@@ -168,6 +168,29 @@ wez.on("update-status", function(window, pane)
   ::set_left_status::
   window:set_left_status(wez.format(left_cells))
 
+  local io = require 'io'
+  local os = require 'os'
+
+  -- Function to get current git branch
+  local function get_git_branch(pane)
+    local cwd_uri = pane:get_current_working_dir()
+    if not cwd_uri then
+      return nil
+    end
+
+    local cwd = cwd_uri:sub(8) -- strip 'file://'
+    local cmd = 'git -C ' .. cwd .. ' rev-parse --abbrev-ref HEAD 2>/dev/null'
+    local handle = io.popen(cmd)
+    local branch = handle:read("*a")
+    handle:close()
+    branch = branch:gsub("\n", "") -- remove trailing newline
+    if branch == "" then
+      return nil
+    end
+    return branch
+  end
+
+
   -- right status
   local right_cells = {
     { Background = { Color = palette.tab_bar.background } },
@@ -219,12 +242,19 @@ wez.on("update-status", function(window, pane)
       table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
       table.insert(right_cells, {
         Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
-          .. options.modules[name].icon,
+            .. options.modules[name].icon,
       })
       table.insert(right_cells, { Text = utilities._space(options.separator.field_icon, options.separator.space, nil) })
     end
     ::continue::
   end
+
+  local branch = get_git_branch(pane)
+  if branch then
+    table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
+    table.insert(right_cells, {Text="🔀 " .. branch .. " "})
+  end
+
   -- remove trailing separator
   table.remove(right_cells, #right_cells)
   table.insert(right_cells, { Text = string.rep(" ", options.padding.right) })
